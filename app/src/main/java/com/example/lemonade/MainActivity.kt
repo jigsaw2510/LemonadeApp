@@ -17,6 +17,7 @@ package com.example.lemonade
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import com.google.android.material.snackbar.Snackbar
@@ -70,7 +71,7 @@ class MainActivity : AppCompatActivity() {
         }
         lemonImage!!.setOnLongClickListener {
             // TODO: replace 'false' with a call to the function that shows the squeeze count
-            false
+            showSnackbar()
         }
     }
 
@@ -94,10 +95,30 @@ class MainActivity : AppCompatActivity() {
 
         when (lemonadeState) {
             SELECT -> {
-                        lemonImage?.setImageResource(R.drawable.lemon_squeeze)
-                        lemonadeState = SQUEEZE
-                        squeezeCount = 0
+                lemonadeState = SQUEEZE
+                squeezeCount = 0
+                lemonTree = LemonTree()
+                lemonSize = lemonTree.pick()
+                Log.d("TAG", "The lemon size is ${lemonSize}")
+                setViewElements()
+            }
+            SQUEEZE -> {
+                squeezeCount ++
+                lemonSize --
+                if (lemonSize == 0) {
+                    lemonadeState = DRINK
                 }
+                setViewElements()
+            }
+            DRINK -> {
+                lemonadeState = RESTART
+                lemonSize = -1
+                setViewElements()
+            }
+            RESTART -> {
+                lemonadeState = SELECT
+                setViewElements()
+            }
 
         }
         // TODO: use a conditional statement like 'if' or 'when' to track the lemonadeState
@@ -126,7 +147,31 @@ class MainActivity : AppCompatActivity() {
      * Set up the view elements according to the state.
      */
     private fun setViewElements() {
+        showSnackbar()
         val textAction: TextView = findViewById(R.id.text_action)
+        when(lemonadeState){
+            SELECT -> {
+                val selectText = this.getResources().getString(R.string.lemon_select)
+                textAction.setText(selectText)
+                lemonImage?.setImageResource(R.drawable.lemon_tree)
+            }
+            SQUEEZE -> {
+                val squeezeText = this.getResources().getString(R.string.lemon_squeeze)
+                textAction.text = squeezeText
+                lemonImage?.setImageResource(R.drawable.lemon_squeeze)
+
+            }
+            DRINK -> {
+                val drinkText = this.getResources().getString(R.string.lemon_drink)
+                textAction.text = drinkText
+                lemonImage?.setImageResource(R.drawable.lemon_drink)
+            }
+            RESTART -> {
+                val restartText = this.getResources().getString(R.string.lemon_empty_glass)
+                textAction.text = restartText
+                lemonImage?.setImageResource(R.drawable.lemon_restart)
+            }
+        }
         // TODO: set up a conditional that tracks the lemonadeState
 
         // TODO: for each state, the textAction TextView should be set to the corresponding string from
